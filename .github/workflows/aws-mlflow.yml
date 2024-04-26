@@ -71,4 +71,5 @@ jobs:
           fi \
 
           docker pull $IMAGE \ 
-          docker run -d --name mlflow-tracking-server -p 5000:5000 $IMAGE \
+          docker run -d --name mlflow-tracking-server -p 5000:5000 $IMAGE
+          |
