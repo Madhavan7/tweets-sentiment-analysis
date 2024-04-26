@@ -61,7 +61,7 @@ jobs:
         username: ${{secrets.MLFLOW_EC2_USERNAME}}
         key: ${{secrets.MLFLOW_EC2_KEY}}
         script:
-          if [[ docker ps -q --filter "name=mlflow-tracking-server" ]] ;
+          if docker ps -q --filter "name=mlflow-tracking-server" ;
           then
             docker stop mlflow-tracking-server &&
             docker rm mlflow-tracking-server &&
