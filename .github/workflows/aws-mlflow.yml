@@ -60,5 +60,5 @@ jobs:
         host: ${{secrets.MLFLOW_EC2_HOST}}
         username: ${{secrets.MLFLOW_EC2_USERNAME}}
         key: ${{secrets.MLFLOW_EC2_KEY}}
-        run: ./mlflow-setup.sh
+        script: mlflow-setup.sh
         
