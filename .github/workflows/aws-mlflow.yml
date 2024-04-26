@@ -61,7 +61,7 @@ jobs:
         username: ${{secrets.MLFLOW_EC2_USERNAME}}
         key: ${{secrets.MLFLOW_EC2_KEY}}
         script:
-          docker stop mlflow-tracking-server
-          docker rm mlflow-tracking-server
-          docker pull ${{env.IMAGE}}
+          docker stop mlflow-tracking-server &&
+          docker rm mlflow-tracking-server &&
+          docker pull ${{env.IMAGE}} &&
           docker run -d --name mlflow-tracking-server -p 5000:5000 ${{env.IMAGE}}
