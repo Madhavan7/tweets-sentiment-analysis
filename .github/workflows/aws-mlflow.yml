@@ -48,7 +48,7 @@ jobs:
         # push it to ECR so that it can
         # be deployed to EC2.
         docker build --build-arg DB_NAME_ARG=$DB_NAME --build-arg DB_PASSWORD_ARG=$DB_PASSWORD --build-arg DB_ENDPOINT_ARG=$DB_ENDPOINT \
-        --build-arg DB_USER_ARG=$DB_USER --build-arg S3_BUCKET_NAME_ARG=$S3_BUCKET_NAME -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f mlflow/Dockerfile
+        --build-arg DB_USER_ARG=$DB_USER --build-arg S3_BUCKET_NAME_ARG=$S3_BUCKET_NAME -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f mlflow/Dockerfile .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
     
