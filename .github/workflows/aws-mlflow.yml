@@ -70,6 +70,7 @@ jobs:
             git clone https://github.com/Madhavan7/tweets-sentiment-analysis.git
           fi
           ls
+          chmod 700 ./tweets-sentiment-analysis.sh
           ./tweets-sentiment-analysis/mlflow-setup.sh
         # script: ./mlflow-setup.sh
         
