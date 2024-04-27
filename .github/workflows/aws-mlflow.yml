@@ -65,6 +65,7 @@ jobs:
         key: ${{secrets.MLFLOW_EC2_KEY}}
         envs: IMAGE
         script: |
+          export IMAGE=${{steps.build-image.image}}
           rm -rf tweets-sentiment-analysis
           git clone https://github.com/Madhavan7/tweets-sentiment-analysis.git
           ls
