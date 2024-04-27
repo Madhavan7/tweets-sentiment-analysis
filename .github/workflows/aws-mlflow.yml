@@ -66,6 +66,7 @@ jobs:
         envs: IMAGE
         script: |
           export IMAGE=${{steps.build-image.image}}
+          echo $IMAGE
           rm -rf tweets-sentiment-analysis
           git clone https://github.com/Madhavan7/tweets-sentiment-analysis.git
           ls
