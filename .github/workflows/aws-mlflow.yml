@@ -64,7 +64,12 @@ jobs:
         username: ${{secrets.MLFLOW_EC2_USERNAME}}
         key: ${{secrets.MLFLOW_EC2_KEY}}
         script: |
-          ls -la
-          echo $IMAGE
+          VARIABLE=$(ls|grep tweets-sentiment-analysis)
+          if [ -z $VARIABLE ];
+          then
+            git clone https://github.com/Madhavan7/tweets-sentiment-analysis.git
+          fi
+          ls
+          ./tweets-sentiment-analysis/mlflow-setup.sh
         # script: ./mlflow-setup.sh
         
