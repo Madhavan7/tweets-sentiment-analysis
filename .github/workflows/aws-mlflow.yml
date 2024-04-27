@@ -57,7 +57,7 @@ jobs:
     
     - name: deploy to ec2 instance
       env:
-        IMAGE: ${{steps.build-image.image}}
+        IMAGE: ${{steps.build-image.outputs.image}}
       uses: appleboy/ssh-action@master
       with:
         host: ${{secrets.MLFLOW_EC2_HOST}}
@@ -65,7 +65,6 @@ jobs:
         key: ${{secrets.MLFLOW_EC2_KEY}}
         envs: IMAGE
         script: |
-          export IMAGE=${{steps.build-image.image}}
           echo $IMAGE
           rm -rf tweets-sentiment-analysis
           git clone https://github.com/Madhavan7/tweets-sentiment-analysis.git
