@@ -7,6 +7,7 @@ then
   docker rm mlflow-tracking-server 
 fi 
 
+echo $IMAGE
 docker pull $IMAGE 
 docker run -d --name mlflow-tracking-server -p 5000:5000 $IMAGE
 exit 0
