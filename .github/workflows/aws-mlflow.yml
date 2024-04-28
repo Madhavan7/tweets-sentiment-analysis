@@ -68,8 +68,8 @@ jobs:
         # envs: IMAGE, ECR_PASSWORD, REGION
         script: |
           fuser -k 5000/tcp
-          which mlflow
-          sh /home/ubuntu/.local/bin/mlflow server -h 0.0.0.0 -p 5000 \
+          echo $PATH
+          mlflow server -h 0.0.0.0 -p 5000 \
           --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} \
            --default-artifact-root ${S3_BUCKET_NAME} --serve-artifacts
           # rm -rf tweets-sentiment-analysis
