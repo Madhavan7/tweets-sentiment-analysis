@@ -67,9 +67,10 @@ jobs:
         key: ${{secrets.MLFLOW_EC2_KEY}}
         # envs: IMAGE, ECR_PASSWORD, REGION
         script: |
+          fuser -k 5000/tcp
           mlflow server -h 0.0.0.0 -p 5000 \
           --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} \
-           --default-artifact-root ${S3_BUCKET_NAME} --serve-artifacts'
+           --default-artifact-root ${S3_BUCKET_NAME} --serve-artifacts
           # rm -rf tweets-sentiment-analysis
           # git clone https://github.com/Madhavan7/tweets-sentiment-analysis.git
           # sh ./tweets-sentiment-analysis/mlflow-setup.sh
