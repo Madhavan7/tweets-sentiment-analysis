@@ -1,4 +1,4 @@
-VARIABLE=$(docker ps -q --filter "name=mlflow-tracking-server")
+VARIABLE=$(docker ps -a --filter "name=mlflow-tracking-server")
 
 if [ -n "$VARIABLE" ]; 
 then 
