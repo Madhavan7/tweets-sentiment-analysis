@@ -10,4 +10,3 @@ fi
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR_PASSWORD
 docker pull $IMAGE 
 docker run -d --name mlflow-tracking-server -p 5000:5000 $IMAGE
-exit 0
