@@ -55,8 +55,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
     
-    - name: Set PATH
-      run: echo "export PATH=\$PATH:/home/ubuntu/.local/bin" >> $GITHUB_ENV
+    # - name: Set PATH
+    #   id: set-path
+    #   run: echo "export PATH=\$PATH:/home/ubuntu/.local/bin" >> $GITHUB_ENV
     
     - name: deploy to ec2 instance
       env:
@@ -71,7 +72,8 @@ jobs:
         # envs: IMAGE, ECR_PASSWORD, REGION
         script: |
           fuser -k 5000/tcp
-          echo $GITHUB_ENV
+          export PATH=$PATH:/home/ubuntu/.local/bin
+          echo $PATH
           mlflow server -h 0.0.0.0 -p 5000 \
           --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} \
            --default-artifact-root ${S3_BUCKET_NAME} --serve-artifacts
