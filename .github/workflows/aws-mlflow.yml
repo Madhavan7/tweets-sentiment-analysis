@@ -58,16 +58,16 @@ jobs:
     - name: deploy to ec2 instance
       env:
         IMAGE: ${{steps.build-image.outputs.image}}
+        ECR_PASSWORD: ${{secrets.ECR_LOGIN_PASSWORD}}
+        REGION: ${{env.AWS_REGION}}
       uses: appleboy/ssh-action@master
       with:
         host: ${{secrets.MLFLOW_EC2_HOST}}
         username: ${{secrets.MLFLOW_EC2_USERNAME}}
         key: ${{secrets.MLFLOW_EC2_KEY}}
-        envs: IMAGE
+        envs: IMAGE, ECR_PASSWORD, REGION
         script: |
-          echo $IMAGE
           rm -rf tweets-sentiment-analysis
           git clone https://github.com/Madhavan7/tweets-sentiment-analysis.git
-          ls
           sh ./tweets-sentiment-analysis/mlflow-setup.sh
         
