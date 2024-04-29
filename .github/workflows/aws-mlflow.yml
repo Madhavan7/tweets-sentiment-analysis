@@ -19,27 +19,16 @@ jobs:
       uses: actions/checkout@v3
     
     - name: deploy to ec2 instance
-<<<<<<< HEAD
-      run: |
-        echo "/home/ubuntu/.local/bin:/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin" >> $GITHUB_PATH
-        fuser -k 5000/tcp
-        mlflow server -h 0.0.0.0 -p 5000 \
-        --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} \
-        --default-artifact-root ${S3_BUCKET_NAME} --serve-artifacts
-=======
-      env:
-        IMAGE: ${{steps.build-image.outputs.image}}
-        ECR_PASSWORD: ${{secrets.ECR_LOGIN_PASSWORD}}
-        REGION: ${{env.AWS_REGION}}
       uses: appleboy/ssh-action@master
       with:
         host: ${{secrets.MLFLOW_EC2_HOST}}
         username: ${{secrets.MLFLOW_EC2_USERNAME}}
         key: ${{secrets.MLFLOW_EC2_KEY}}
-        envs: IMAGE, ECR_PASSWORD, REGION
         script: |
-          rm -rf tweets-sentiment-analysis
-          git clone https://github.com/Madhavan7/tweets-sentiment-analysis.git
-          sh ./tweets-sentiment-analysis/mlflow-setup.sh
->>>>>>> parent of 866754e (changes to Dockerfile now not using containerization)
+          fuser -k 5000/tcp
+          mlflow server \
+          -h 0.0.0.0 -p 5000 --backend-store-uri \
+          postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} \
+          --default-artifact-root ${S3_BUCKET_NAME} --serve-artifacts
+
         
