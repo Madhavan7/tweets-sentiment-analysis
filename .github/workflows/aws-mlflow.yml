@@ -11,7 +11,7 @@ permissions:
 jobs:
   deploy:
     name: Deploy
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     environment: production
 
     steps:
@@ -20,10 +20,18 @@ jobs:
     
     - name: deploy to ec2 instance
       uses: appleboy/ssh-action@master
+      env:
+        PATH: "/home/ubuntu/.local/bin:/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+        DB_USER: ${{secrets.DB_USER}}
+        DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+        DB_ENDPOINT: ${{secrets.DB_ENDPOINT}}
+        DB_NAME: ${{secrets.DB_NAME}}
+        S3_BUCKET_NAME: ${{secrets.ARTIFACTS_S3_BUCKET}}
       with:
         host: ${{secrets.MLFLOW_EC2_HOST}}
         username: ${{secrets.MLFLOW_EC2_USERNAME}}
         key: ${{secrets.MLFLOW_EC2_KEY}}
+        envs: PATH, DB_USER, DB_PASSWORD, DB_ENDPOINT, DB_NAME, S3_BUCKET_NAME
         script: |
           fuser -k 5000/tcp
           mlflow server \
