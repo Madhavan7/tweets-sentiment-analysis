@@ -20,8 +20,9 @@ jobs:
     
     - name: deploy to ec2 instance
       run: |
+        echo "/home/ubuntu/.local/bin:/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin" >> $GITHUB_PATH
         fuser -k 5000/tcp
-        # mlflow server -h 0.0.0.0 -p 5000 \
-        # --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} \
-        # --default-artifact-root ${S3_BUCKET_NAME} --serve-artifacts
+        mlflow server -h 0.0.0.0 -p 5000 \
+        --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} \
+        --default-artifact-root ${S3_BUCKET_NAME} --serve-artifacts
         
