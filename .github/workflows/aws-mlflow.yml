@@ -1,9 +1,12 @@
-
 name: Deploy to Amazon EC2
 
 on:
   push:
     branches: [ "main" ]
+
+env:
+  AWS_REGION: ca-central-1                  # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: ${{secrets.MLFLOW_ECR_REPOSITORY_NAME}}          # set this to your Amazon ECR repository name
 
 permissions:
   contents: read
@@ -17,26 +20,57 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    
-    - name: deploy to ec2 instance
-      uses: appleboy/ssh-action@master
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY}}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
       env:
-        PATH: "/home/ubuntu/.local/bin:/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
-        DB_USER: ${{secrets.DB_USER}}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+        DB_NAME: ${{secrets.DB_NAME}}
         DB_PASSWORD: ${{secrets.DB_PASSWORD}}
         DB_ENDPOINT: ${{secrets.DB_ENDPOINT}}
-        DB_NAME: ${{secrets.DB_NAME}}
+        DB_USER: ${{secrets.DB_USER}}
         S3_BUCKET_NAME: ${{secrets.ARTIFACTS_S3_BUCKET}}
+      run: |
+        # Build a docker container and
+        # push it to ECR so that it can
+        # be deployed to EC2.
+        docker build --build-arg DB_NAME_ARG=$DB_NAME --build-arg DB_PASSWORD_ARG=$DB_PASSWORD --build-arg DB_ENDPOINT_ARG=$DB_ENDPOINT \
+        --build-arg DB_USER_ARG=$DB_USER --build-arg S3_BUCKET_NAME_ARG=$S3_BUCKET_NAME -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f mlflow/Dockerfile .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+    
+    - name: deploy to ec2 instance
+      env:
+        IMAGE: ${{steps.build-image.outputs.image}}
+        ECR_PASSWORD: ${{secrets.ECR_LOGIN_PASSWORD}}
+        REGION: ${{env.AWS_REGION}}
+      uses: appleboy/ssh-action@master
       with:
         host: ${{secrets.MLFLOW_EC2_HOST}}
         username: ${{secrets.MLFLOW_EC2_USERNAME}}
         key: ${{secrets.MLFLOW_EC2_KEY}}
-        envs: PATH, DB_USER, DB_PASSWORD, DB_ENDPOINT, DB_NAME, S3_BUCKET_NAME
+        envs: IMAGE, ECR_PASSWORD, REGION
         script: |
-          fuser -k 5000/tcp
-          mlflow server \
-          -h 0.0.0.0 -p 5000 --backend-store-uri \
-          postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} \
-          --default-artifact-root ${S3_BUCKET_NAME} --serve-artifacts
+          rm -rf tweets-sentiment-analysis
+          git clone https://github.com/Madhavan7/tweets-sentiment-analysis.git
+          sh ./tweets-sentiment-analysis/mlflow-setup.sh
+
+
+
 
         
