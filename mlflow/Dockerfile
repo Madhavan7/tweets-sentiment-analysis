@@ -12,7 +12,7 @@ ENV DB_ENDPOINT=DB_ENDPOINT_ARG
 ENV DB_USER=DB_USER_ARG
 ENV S3_BUCKET_NAME=S3_BUCKET_NAME_ARG
 
-COPY requirements.txt .
+COPY mlflow/requirements.txt .
 
 RUN pip install -r requirements.txt
 
