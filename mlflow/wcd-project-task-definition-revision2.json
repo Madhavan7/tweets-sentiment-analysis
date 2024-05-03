@@ -1,9 +1,9 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:ca-central-1:499751399505:task-definition/wcd-project-task-definition:1",
+    "taskDefinitionArn": "arn:aws:ecs:ca-central-1:499751399505:task-definition/wcd-project-task-definition:2",
     "containerDefinitions": [
         {
             "name": "mlflow-tracking-server",
-            "image": "499751399505.dkr.ecr.ca-central-1.amazonaws.com/mlflow-tracking-server/4f8cbdf9db9b9d85d2a5419bb8860a68d013340",
+            "image": "499751399505.dkr.ecr.ca-central-1.amazonaws.com/mlflow-tracking-server:4f8cbdf9db9b9d85d2a5419bb8860a68d013340f",
             "cpu": 2048,
             "portMappings": [
                 {
@@ -16,10 +16,8 @@
             ],
             "essential": true,
             "environment": [],
-            "environmentFiles": [],
             "mountPoints": [],
             "volumesFrom": [],
-            "ulimits": [],
             "systemControls": []
         }
     ],
@@ -27,7 +25,7 @@
     "taskRoleArn": "arn:aws:iam::499751399505:role/mlflow-server-access",
     "executionRoleArn": "arn:aws:iam::499751399505:role/ecsTaskExecutionRole",
     "networkMode": "awsvpc",
-    "revision": 1,
+    "revision": 2,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -61,7 +59,7 @@
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2024-05-03T04:13:26.927Z",
+    "registeredAt": "2024-05-03T05:17:33.001Z",
     "registeredBy": "arn:aws:iam::499751399505:user/wcd-student",
     "tags": []
 }
