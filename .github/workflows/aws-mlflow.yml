@@ -49,6 +49,7 @@ jobs:
         # Build a docker container and
         # push it to ECR so that it can
         # be deployed to EC2.
+        echo $PORT
         docker build --build-arg TRACKING_SERVER_HOST_ARG=$TRACKING_SERVER_HOST --build-arg PORT_ARG=$PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f doc2vec/Dockerfile .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
