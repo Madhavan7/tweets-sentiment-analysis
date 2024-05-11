@@ -6,7 +6,7 @@ on:
 
 env:
   AWS_REGION: ca-central-1                  # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: ${{secrets.DOC2VEC_MODEL_REPO}}          # set this to your Amazon ECR repository name
+  ECR_REPOSITORY: ${{secrets.DOC2VEC_MODEL_REPO_NAME}}          # set this to your Amazon ECR repository name
   ECS_SERVICE: doc2vec-model        # set this to your Amazon ECS service name
   ECS_CLUSTER: wcd-project-cluster-2                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: doc2vec/doc2vec-task-definition-revision1.json # set this to the path to your Amazon ECS task definition
