@@ -44,7 +44,7 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
         TRACKING_SERVER_HOST: ${{secrets.MLFLOW_EC2_HOST}}
-        PORT: ${{secrets.MLFLOW_EC2_PORT}}
+        PORT: ${{secrets.MLFLOW_PORT}}
       run: |
         # Build a docker container and
         # push it to ECR so that it can
