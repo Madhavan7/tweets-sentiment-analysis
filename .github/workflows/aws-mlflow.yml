@@ -6,12 +6,12 @@ on:
 
 env:
   AWS_REGION: ca-central-1                  # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: ${{secrets.MLFLOW_ECR_REPOSITORY_NAME}}          # set this to your Amazon ECR repository name
-  ECS_SERVICE: mlflow-server-3              # set this to your Amazon ECS service name
+  ECR_REPOSITORY: ${{secrets.MODEL_REPOSITORY}}          # set this to your Amazon ECR repository name
+  ECS_SERVICE: doc2vec-model        # set this to your Amazon ECS service name
   ECS_CLUSTER: wcd-project-cluster-2                 # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: mlflow/wcd-project-task-definition-revision4.json # set this to the path to your Amazon ECS task definition
+  ECS_TASK_DEFINITION: doc2vec/doc2vec-task-definition-revision1.json # set this to the path to your Amazon ECS task definition
                                                # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: mlflow-tracking-server        # set this to the name of the container in the
+  CONTAINER_NAME: doc2vec        # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
 
 permissions:
@@ -43,17 +43,13 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
-        DB_NAME: ${{secrets.DB_NAME}}
-        DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-        DB_ENDPOINT: ${{secrets.DB_ENDPOINT}}
-        DB_USER: ${{secrets.DB_USER}}
-        S3_BUCKET_NAME: ${{secrets.ARTIFACTS_S3_BUCKET}}
+        TRACKING_SERVER_HOST: ${{secrets.MLFLOW_EC2_HOST}}
+        PORT: ${{secrets.MLFLOW_EC2_PORT}}
       run: |
         # Build a docker container and
         # push it to ECR so that it can
         # be deployed to EC2.
-        docker build --build-arg DB_NAME_ARG=$DB_NAME --build-arg DB_PASSWORD_ARG=$DB_PASSWORD --build-arg DB_ENDPOINT_ARG=$DB_ENDPOINT \
-        --build-arg DB_USER_ARG=$DB_USER --build-arg S3_BUCKET_NAME_ARG=$S3_BUCKET_NAME -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f mlflow/Dockerfile .
+        docker build --build-arg TRACKING_SERVER_HOST_ARG=$TRACKING_SERVER_HOST --build-arg PORT_ARG=$PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f doc2vec/Dockerfile .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
     
