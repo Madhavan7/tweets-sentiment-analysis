@@ -6,20 +6,24 @@ on:
 
 env:
   AWS_REGION: ca-central-1                  # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: ${{secrets.DOC2VEC_MODEL_REPO_NAME}}          # set this to your Amazon ECR repository name
-  ECS_SERVICE: doc2vec-model-service        # set this to your Amazon ECS service name
+  MODEL_ECR_REPOSITORY: ${{secrets.DOC2VEC_MODEL_REPO_NAME}}          # set this to your Amazon ECR repository name
+  MODEL_ECS_SERVICE: doc2vec-model-service        # set this to your Amazon ECS service name
   ECS_CLUSTER: wcd-project-cluster-2                 # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: doc2vec/doc2vec-task-definition-revision1.json # set this to the path to your Amazon ECS task definition
+  MODEL_TASK_DEFINITION: doc2vec/doc2vec-task-definition-revision1.json # set this to the path to your Amazon ECS task definition
                                                # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: doc2vec        # set this to the name of the container in the
+  MODEL_CONTAINER_NAME: doc2vec        # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
+  FRONTEND_ECR_REPOSITORY: ${{secrets.FRONTEND_ECR_REPOSITORY}}
+  FRONTEND_ECS_SERVICE: model-frontend-service
+  FRONTEND_TASK_DEFINITION: frontend/model-frontend-task-definition-revision1.json
+  FRONTEND_CONTAINER_NAME: model-frontend
 
 permissions:
   contents: read
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deploy 
     runs-on: ubuntu-latest
     environment: production
 
@@ -38,8 +42,8 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build, tag, and push image to Amazon ECR
-      id: build-image
+    - name: Build, tag, and push model image to Amazon ECR
+      id: build-model-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
@@ -50,26 +54,55 @@ jobs:
         # push it to ECR so that it can
         # be deployed to EC2.
         echo $PORT
-        docker build --build-arg TRACKING_SERVER_HOST_ARG=$TRACKING_SERVER_HOST --build-arg PORT_ARG=$PORT -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f doc2vec/Dockerfile .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        docker build --build-arg TRACKING_SERVER_HOST_ARG=$TRACKING_SERVER_HOST --build-arg PORT_ARG=$PORT -t $ECR_REGISTRY/$MODEL_ECR_REPOSITORY:$IMAGE_TAG -f doc2vec/Dockerfile .
+        docker push $ECR_REGISTRY/$MODEL_ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$MODEL_ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
     
     - name: Fill in the new image ID in the Amazon ECS task definition
-      id: task-def
+      id: model-task-def
       uses: aws-actions/amazon-ecs-render-task-definition@c804dfbdd57f713b6c079302a4c01db7017a36fc
       with:
-        task-definition: ${{ env.ECS_TASK_DEFINITION }}
-        container-name: ${{ env.CONTAINER_NAME }}
-        image: ${{ steps.build-image.outputs.image }}
+        task-definition: ${{ env.MODEL_TASK_DEFINITION }}
+        container-name: ${{ env.MODEL_CONTAINER_NAME }}
+        image: ${{ steps.build-model-image.outputs.image }}
 
-    - name: Deploy Amazon ECS task definition
+    - name: Deploy Model Amazon ECS task definition
       uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
       with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
+        task-definition: ${{ steps.model-task-def.outputs.task-definition }}
+        service: ${{ env.MODEL_ECS_SERVICE }}
         cluster: ${{ env.ECS_CLUSTER }}
         wait-for-service-stability: true
+    
+    
+    - name: Build, tag, and push frontend image to Amazon ECR
+      id: build-frontend-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+        DOC2VEC_DNS: ${{secrets.DOC2VEC_DNS}}
+        PORT: ${{secrets.DOC2VEC_PORT}}
+      run: |
+        echo $PORT
+        docker build --build-arg DOC2VEC_DNS_ARG=$DOC2VEC_DNS --build-arg PORT_ARG=$PORT -t $ECR_REGISTRY/$MODEL_ECR_REPOSITORY:$IMAGE_TAG -f doc2vec/Dockerfile .
+        docker push $ECR_REGISTRY/$MODEL_ECR_REPOSITORY:$IMAGE_TAG
+        echo "image=$ECR_REGISTRY/$MODEL_ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: frontend-task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@c804dfbdd57f713b6c079302a4c01db7017a36fc
+      with:
+        task-definition: ${{ env.FRONTEND_TASK_DEFINITION}}
+        container-name: ${{ env.FRONTEND_CONTAINER_NAME}}
+        image: ${{ steps.build-frontend-image.outputs.image }}
+
+    - name: Deploy Frontend Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
+      with:
+        task-definition: ${{ steps.frontend-task-def.outputs.task-definition }}
+        service: ${{ env.FRONTEND_ECS_SERVICE }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true    
 
 
 
