@@ -16,4 +16,4 @@ RUN pip3 install mlflow==2.12.1 psycopg2-binary==2.9.9 boto3==1.34.96
 
 EXPOSE 5000
 
-CMD ["sh", "-c","mlflow server -h 0.0.0.0 -p 5000 --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} --default-artifact-root s3://${S3_BUCKET_NAME}"]
+CMD ["sh", "-c","mlflow server -h 0.0.0.0 -p 5000 --backend-store-uri postgresql://${DB_USER}:${DB_PASSWORD}@${DB_ENDPOINT}:5432/${DB_NAME} --default-artifact-root ${S3_BUCKET_NAME}"]
